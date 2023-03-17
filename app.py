@@ -6,6 +6,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import filedialog
+import uuid
+import os
 
 # 支持不同系统的中文字体
 import sys
@@ -176,7 +178,18 @@ class App(tk.Tk):
     def save_file(self):
         file_path = filedialog.asksaveasfilename(filetypes=[('图片', '*.jpg *.png *.jpeg')])
         if file_path:
-            cv2.imwrite(file_path, self.result)
+            if not file_path.endswith(('.jpg', '.png', '.jpeg')):
+                file_path += '.png'
+            if sys.platform == 'win32': 
+                # Windows OpenCV不支持中文路径，先写入临时文件
+                dir_name = os.path.dirname(file_path)
+                uuid_name = uuid.uuid5(uuid.NAMESPACE_DNS, file_path)
+                _, ext = os.path.splitext(file_path)
+                temp_path = os.path.join(dir_name, str(uuid_name) + ext)
+                cv2.imwrite(temp_path, self.result)
+                os.rename(temp_path, file_path)
+            else:
+                cv2.imwrite(file_path, self.result)
 
 
     @staticmethod
