@@ -4,10 +4,18 @@ from scipy import signal
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-plt.rcParams["font.sans-serif"] = ["Hiragino Sans GB"]
-plt.rcParams["axes.unicode_minus"] = False
 import tkinter as tk
 from tkinter import filedialog
+
+# 支持不同系统的中文字体
+import sys
+if sys.platform == 'darwin':
+    plt.rcParams["font.sans-serif"] = ["Hiragino Sans GB"]
+elif sys.platform == 'win32':
+    plt.rcParams["font.sans-serif"] = ["SimHei"]
+else:
+    plt.rcParams["font.sans-serif"] = ["SimHei"]
+plt.rcParams["axes.unicode_minus"] = False
 
 
 # 固定尺寸
