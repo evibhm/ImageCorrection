@@ -7,10 +7,11 @@ import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import filedialog
 import uuid
-import os
+import os,shutil
 
 # 支持不同系统的中文字体
 import sys
+
 if sys.platform == 'darwin':
     plt.rcParams["font.sans-serif"] = ["Hiragino Sans GB"]
 elif sys.platform == 'win32':
@@ -70,7 +71,7 @@ def getBoxPoint(contour):
 def adaPoint(box, pro):
     box_pro = box
     if pro != 1.0:
-        box_pro = box/pro
+        box_pro = box / pro
     box_pro = np.trunc(box_pro)
     return box_pro
 
@@ -95,7 +96,7 @@ def pointDistance(a, b):
 # 透视变换
 def warpImage(image, box):
     w, h = pointDistance(box[0], box[1]), \
-           pointDistance(box[1], box[2])
+        pointDistance(box[1], box[2])
     dst_rect = np.array([[0, 0],
                          [w - 1, 0],
                          [w - 1, h - 1],
@@ -103,6 +104,7 @@ def warpImage(image, box):
     M = cv2.getPerspectiveTransform(box, dst_rect)
     warped = cv2.warpPerspective(image, M, (w, h))
     return warped
+
 
 def adaptive_thres(img, win=9, beta=0.9):
     if win % 2 == 0: win = win - 1
@@ -137,7 +139,7 @@ class App(tk.Tk):
         self.filemenu.add_command(label='退出', command=self.quit)
         self.menubar.add_cascade(label='文件', menu=self.filemenu)
         self.config(menu=self.menubar)
-        
+
         self.figure_origin = Figure(figsize=(6, 6), dpi=100)
         self.figure_origin.set_facecolor('white')
         self.canvas_origin = FigureCanvasTkAgg(self.figure_origin, self)
@@ -151,11 +153,29 @@ class App(tk.Tk):
         self.canvas_result.get_tk_widget().grid(row=0, column=1)
         self.figure_result.tight_layout()
         self.canvas_result.draw()
-        
+
+    def cv_imread(self,file_path=""):
+        uuid_name = uuid.uuid5(uuid.NAMESPACE_DNS, file_path)
+        _, ext = os.path.splitext(file_path)
+        temp_path = os.path.join('./', str(uuid_name) + ext)
+        shutil.copyfile(file_path, temp_path)
+        img_mat = cv2.imread(temp_path)
+        os.remove(temp_path)
+        return img_mat
+
+    def cv_imwrite(self,file_path,result):
+        uuid_name = uuid.uuid5(uuid.NAMESPACE_DNS, file_path)
+        _, ext = os.path.splitext(file_path)
+        temp_path = os.path.join('./', str(uuid_name) + ext)
+        cv2.imwrite(temp_path, result)
+        shutil.move(temp_path, file_path)
+
+
     def open_file(self):
         file_path = filedialog.askopenfilename(filetypes=[('图片', '*.jpg *.png *.jpeg')])
         if file_path:
-            self.origin = cv2.imread(file_path)
+            # self.origin = cv2.imread(file_path)
+            self.origin = self.cv_imread(file_path)
             self.result = App.enhance(self.origin)
             self.show_image()
 
@@ -174,22 +194,14 @@ class App(tk.Tk):
         ax2.set_title('结果')
         self.canvas_origin.draw()
         self.canvas_result.draw()
-    
+
     def save_file(self):
         file_path = filedialog.asksaveasfilename(filetypes=[('图片', '*.jpg *.png *.jpeg')])
         if file_path:
             if not file_path.endswith(('.jpg', '.png', '.jpeg')):
-                file_path += '.png'
-            if sys.platform == 'win32': 
-                # Windows OpenCV不支持中文路径，先写入临时文件
-                dir_name = os.path.dirname(file_path)
-                uuid_name = uuid.uuid5(uuid.NAMESPACE_DNS, file_path)
-                _, ext = os.path.splitext(file_path)
-                temp_path = os.path.join(dir_name, str(uuid_name) + ext)
-                cv2.imwrite(temp_path, self.result)
-                os.rename(temp_path, file_path)
-            else:
-                cv2.imwrite(file_path, self.result)
+                file_path += '.jpg'
+                # cv2.imwrite(temp_path, self.result)
+                self.cv_imwrite(file_path,self.result)
 
 
     @staticmethod
@@ -204,9 +216,8 @@ class App(tk.Tk):
         warped = warpImage(image, boxes)
         thre = adaptive_thres(cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY), win=9, beta=0.9)
         return thre
-        
+
 
 if __name__ == '__main__':
     app = App()
     app.mainloop()
-    
