@@ -1,0 +1,12 @@
+[project]
+name = "imagecorrection"
+version = "1.0.0"
+description = "这是一个基于 Python 和 Gradio 构建的交互式图像处理Web应用。用户可以上传图片（如包含文档、票据等），系统会自动进行边缘检测、透视矫正，并应用自适应二值化来增强图像。应用界面还提供了多个可调节参数，以便用户实时观察不同参数设置对处理结果的影响。"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "gradio>=5.29.1",
+    "numpy>=2.2.5",
+    "opencv-python>=4.11.0.86",
+    "scipy>=1.15.3",
+]
