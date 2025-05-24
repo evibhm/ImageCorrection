@@ -32,7 +32,7 @@
     ```
     或者
     ```bash
-    pip install -r requirement
+    pip install -r requirements.txt
     ```
 
 3.  **运行应用**:
