@@ -1,0 +1,54 @@
+# .dockerignore
+
+# Python 缓存和编译文件
+
+**pycache**/
+\*.pyc
+\*.pyo
+\*.pyd
+\*.egg-info/
+
+# 虚拟环境文件夹
+
+env/
+venv/
+.venv/
+
+# Git 相关
+
+.git/
+.gitignore
+.gitattributes
+
+# GitHub Actions 和 VSCode 等编辑器配置
+
+.github/
+.vscode/
+.idea/
+
+# 操作系统特定文件
+
+\*.DS\_Store
+Thumbs.db
+
+# 构建输出和打包文件 (如果在本机构建过)
+
+dist/
+build/
+\*.tar.gz
+\*.zip
+\*.exe
+\*.dmg
+\*.deb
+\*.rpm
+
+# 日志文件
+
+\*.log
+logs/
+
+# 其他不需要包含在镜像中的文件
+
+# local\_settings.py
+
+# secrets.txt
